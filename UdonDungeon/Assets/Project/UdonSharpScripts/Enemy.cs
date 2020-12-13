@@ -29,7 +29,7 @@ public class Enemy : UdonSharpBehaviour
     public Text healthText;
     private bool playersNearby = false;
     private Dungeoneer targetDungeoneer;
-    public PartyUICanvas dungeoneerManager;
+    public DungeoneerManager dungeoneerManager;
     private MeshRenderer meshRenderer;
     private Rigidbody rb;
     [UdonSynced(UdonSyncMode.None)]

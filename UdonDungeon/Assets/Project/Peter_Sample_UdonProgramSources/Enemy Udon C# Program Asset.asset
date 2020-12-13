@@ -25,7 +25,7 @@ MonoBehaviour:
     SerializedBytes: 
     ReferencedUnityObjects:
     - {fileID: 11500000, guid: 99376172f0abd8f4896a3b9f91143750, type: 3}
-    - {fileID: 11500000, guid: c958956ee7e88f54e8d92a11d2c56bee, type: 3}
+    - {fileID: 11500000, guid: 1be7d794ad2e8cf4c933f807d05e754b, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -836,7 +836,7 @@ MonoBehaviour:
       Data: 55|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: PartyUICanvas, Assembly-CSharp
+      Data: DungeoneerManager, Assembly-CSharp
     - Name: 
       Entry: 8
       Data: 
