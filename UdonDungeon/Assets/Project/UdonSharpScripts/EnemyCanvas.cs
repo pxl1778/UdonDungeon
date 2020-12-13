@@ -7,11 +7,11 @@ using VRC.Udon;
 
 public class EnemyCanvas : UdonSharpBehaviour
 {
-    public Canvas canvas;
+    private Canvas canvas;
 
     void Start()
     {
-        
+        canvas = this.gameObject.GetComponent<Canvas>();
     }
 
     void Update()
