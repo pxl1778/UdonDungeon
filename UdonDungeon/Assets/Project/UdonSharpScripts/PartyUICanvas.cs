@@ -8,12 +8,9 @@ public class PartyUICanvas : UdonSharpBehaviour
     Canvas canvas;
     VRCPlayerApi localPlayer;
 
-    //only the owner will touch these
-    [UdonSynced] int playerCount;
     [UdonSynced] string hpString;
 
-    public Dungeoneer[] dungeoneers;
-    public GameObject dungeoneerManager;
+    public DungeoneerManager dungeoneerManager;
     public Text debugText;
     public Text hpText;
 
@@ -36,6 +33,7 @@ public class PartyUICanvas : UdonSharpBehaviour
 
             if (Networking.IsOwner(Networking.LocalPlayer, gameObject))
             {
+                Dungeoneer[] dungeoneers = dungeoneerManager.dungeoneers;
                 hpString = "";
                 for (int i = 0; i < dungeoneers.Length; i++)
                 {
@@ -49,55 +47,9 @@ public class PartyUICanvas : UdonSharpBehaviour
         }
     }
 
-    public override void OnPlayerJoined(VRCPlayerApi player)
-    {
-        if (Networking.IsOwner(Networking.LocalPlayer, gameObject))
-        {
-            for (int i = 0; i < dungeoneers.Length; i++)
-            {
-                if (dungeoneers[i].playerID == -1)
-                {
-                    dungeoneers[i].displayName = player.displayName;
-                    dungeoneers[i].playerID = player.playerId;
-                    playerCount++;
-                    break;
-                }
-            }
-        }
-    }
-
-    public override void OnPlayerLeft(VRCPlayerApi player)
-    {
-        if (Networking.IsOwner(Networking.LocalPlayer, gameObject))
-        {
-            for (int i = 0; i < dungeoneers.Length; i++)
-            {
-                if (dungeoneers[i].playerID == player.playerId)
-                {
-                    dungeoneers[i].displayName = null;
-                    dungeoneers[i].playerID = -1;
-                    playerCount--;
-                    break;
-                }
-            }
-        }
-    }
-
     public override void OnDeserialization()
     {
         hpText.text = hpString;
     }
 
-    public Dungeoneer getDungeoneerForID(int ID)
-    {
-        for (int i = 0; i < dungeoneers.Length; i++)
-        {
-            if (dungeoneers[i].playerID == ID)
-            {
-                return dungeoneers[i];
-            }
-        }
-
-        return null;
-    }
 }
