@@ -28,8 +28,8 @@ public class Enemy : UdonSharpBehaviour
     [SerializeField]
     public Text healthText;
     private bool playersNearby = false;
-    private VRCPlayerApi Target;
-    private VRCPlayerApi[] Players;
+    private Dungeoneer targetDungeoneer;
+    public PartyUICanvas dungeoneerManager;
     private MeshRenderer meshRenderer;
     private Rigidbody rb;
     [UdonSynced(UdonSyncMode.None)]
@@ -39,7 +39,6 @@ public class Enemy : UdonSharpBehaviour
 
     void Start()
     {
-        Players = new VRCPlayerApi[4];
         meshRenderer = this.GetComponent<MeshRenderer>();
         rb = this.GetComponent<Rigidbody>();
         health = maxHealth;
@@ -49,7 +48,7 @@ public class Enemy : UdonSharpBehaviour
 
     void Update()
     {
-        if(Target == null)
+        if(targetDungeoneer == null)
         {//searching for target
             if(!playersNearby) { return; }
             //debugText.text += "\nPlayersNearby == true";
@@ -66,10 +65,11 @@ public class Enemy : UdonSharpBehaviour
                     {
                         Networking.SetOwner(localPlayer, this.gameObject);
                         debugText.text += "\nSet new Target";
-                        Target = localPlayer;
+                        targetDungeoneer = dungeoneerManager.getDungeoneerForID(localPlayer.playerId);
                         targetID = localPlayer.playerId;
                         meshRenderer.material.color = new Color(1.0f, 0.0f, 0.0f);
                         targetText.text = localPlayer.displayName;
+                        //debugText.text += "\nGrabbed Dungeoneer: " + targetDungeoneer.displayName;
                         //SendCustomEvent("_onDeserialization");
                         //this.SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, "UpdateRanking");
                     }
@@ -82,16 +82,17 @@ public class Enemy : UdonSharpBehaviour
         }
         else
         {//chasing target
-            if(Target.playerId == Networking.LocalPlayer.playerId)
+            if(targetDungeoneer.playerID == Networking.LocalPlayer.playerId)
             {
                 attackCooldown -= Time.deltaTime;
                 if (attackCooldown <= 0)
                 {
                     attackCooldown = maxAttackCooldown;
                     //Target.CombatSetCurrentHitpoints(Target.CombatGetCurrentHitpoints() - damage);
+                    targetDungeoneer.SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, "TakeDamage");
                 }
-                float distance = Vector3.Distance(Target.GetPosition(), gameObject.transform.position);
-                this.gameObject.transform.LookAt(Target.GetBonePosition(HumanBodyBones.Hips));
+                float distance = Vector3.Distance(Networking.LocalPlayer.GetPosition(), gameObject.transform.position);
+                this.gameObject.transform.LookAt(Networking.LocalPlayer.GetBonePosition(HumanBodyBones.Hips));
                 Quaternion rot = gameObject.transform.rotation;
                 rot.x = 0;
                 rot.z = 0;
@@ -99,7 +100,7 @@ public class Enemy : UdonSharpBehaviour
                 //this.gameObject.transform.rotation
                 if (distance > personalSpace)
                 {
-                    Vector3 direction = (Target.GetPosition() - gameObject.transform.position).normalized;
+                    Vector3 direction = (Networking.LocalPlayer.GetPosition() - gameObject.transform.position).normalized;
                     //Vector3 goalPosition = gameObject.transform.position + (direction * speed * Time.deltaTime);
                     //float goalDistance = Vector3.Distance(goalPosition, gameObject.transform.position);
                     //this.gameObject.transform.position = goalPosition;
@@ -123,7 +124,7 @@ public class Enemy : UdonSharpBehaviour
     public override void OnPlayerTriggerExit(VRCPlayerApi player)
     {
         debugText.text += "\nOnPlayerTriggerExit";
-        if (Target != null && player.playerId == Target.playerId)
+        if (targetDungeoneer != null && player.playerId == targetDungeoneer.playerID)
         {
             ResetAggro();
         }
@@ -134,7 +135,7 @@ public class Enemy : UdonSharpBehaviour
         debugText.text += "\nResetAggro";
         playersNearby = false;
         meshRenderer.material.color = new Color(1.0f, 1.0f, 1.0f);
-        Target = null;
+        targetDungeoneer = null;
         Networking.SetOwner(Networking.LocalPlayer, gameObject);
         targetID = -1;
         targetText.text = "none";
@@ -148,15 +149,15 @@ public class Enemy : UdonSharpBehaviour
         {
             //debugText.text += "\nOn Deserialization targetID != -1";
             meshRenderer.material.color = new Color(1.0f, 0.0f, 0.0f);
-            Target = VRCPlayerApi.GetPlayerById(targetID);
-            targetText.text = Target.displayName;
+            targetDungeoneer = dungeoneerManager.getDungeoneerForID(targetID);
+            targetText.text = targetDungeoneer.displayName;
         }
         else
         {
             //debugText.text += "\nOn Deserialization  targetID == -1";
             meshRenderer.material.color = new Color(1.0f, 1.0f, 1.0f);
-            Target = null;
             targetText.text = "none";
+            targetDungeoneer = null;
         }
         //debugText.text += "\nOnDeserialization: health = " + health;
         healthText.text = health + "/" + maxHealth;
