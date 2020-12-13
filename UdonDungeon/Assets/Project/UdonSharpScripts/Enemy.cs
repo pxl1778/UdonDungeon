@@ -8,7 +8,7 @@ using VRC.Udon;
 public class Enemy : UdonSharpBehaviour
 {
     [SerializeField]
-    private float health = 10;
+    private int maxHealth = 10;
     [SerializeField]
     private float damage = 1;
     [SerializeField]
@@ -25,6 +25,8 @@ public class Enemy : UdonSharpBehaviour
     public Text targetText;
     [SerializeField]
     public Text debugText;
+    [SerializeField]
+    public Text healthText;
     private bool playersNearby = false;
     private VRCPlayerApi Target;
     private VRCPlayerApi[] Players;
@@ -32,12 +34,17 @@ public class Enemy : UdonSharpBehaviour
     private Rigidbody rb;
     [UdonSynced(UdonSyncMode.None)]
     public int targetID = -1;
+    [UdonSynced(UdonSyncMode.None)]
+    public int health = 10;
 
     void Start()
     {
         Players = new VRCPlayerApi[4];
         meshRenderer = this.GetComponent<MeshRenderer>();
         rb = this.GetComponent<Rigidbody>();
+        health = maxHealth;
+        debugText.text += "\nStart";
+        healthText.text = health + "/" + health;
     }
 
     void Update()
@@ -136,20 +143,33 @@ public class Enemy : UdonSharpBehaviour
 
     public override void OnDeserialization()
     {
-        debugText.text += "\nOn Deserialization Called.";
+        //debugText.text += "\nOn Deserialization Called.";
         if(targetID != -1)
         {
-            debugText.text += "\nOn Deserialization targetID != -1";
+            //debugText.text += "\nOn Deserialization targetID != -1";
             meshRenderer.material.color = new Color(1.0f, 0.0f, 0.0f);
             Target = VRCPlayerApi.GetPlayerById(targetID);
             targetText.text = Target.displayName;
         }
         else
         {
-            debugText.text += "\nOn Deserialization  targetID == -1";
+            //debugText.text += "\nOn Deserialization  targetID == -1";
             meshRenderer.material.color = new Color(1.0f, 1.0f, 1.0f);
             Target = null;
             targetText.text = "none";
+        }
+        //debugText.text += "\nOnDeserialization: health = " + health;
+        healthText.text = health + "/" + maxHealth;
+    }
+
+    public void TakeDamage()
+    {
+        health = health - 1;
+        debugText.text += "\nTakeDamage: health = " + health;
+        healthText.text = health + "/" + maxHealth;
+        if (health <= 0)
+        {
+            this.gameObject.SetActive(false);
         }
     }
 
