@@ -1,24 +1,18 @@
-﻿
-using System.Collections.Generic;
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDKBase;
-using VRC.Udon;
 
 public class PartyUICanvas : UdonSharpBehaviour
 {
-    const float MAX_HP = 100;
-
     Canvas canvas;
     VRCPlayerApi localPlayer;
 
-    //only the owner will touch this
-    VRCPlayerApi[] players;
+    //only the owner will touch these
+    [UdonSynced] int playerCount;
+    [UdonSynced] string hpString;
 
-    [UdonSynced(UdonSyncMode.None)]
-    string hpString;
-
+    public Dungeoneer[] dungeoneers;
     public Text debugText;
     public Text hpText;
 
@@ -37,42 +31,53 @@ public class PartyUICanvas : UdonSharpBehaviour
             Vector3 playerPos = localPlayer.GetBonePosition(HumanBodyBones.Hips);
             Quaternion playerRotation = localPlayer.GetRotation();
             var forward = playerRotation * Vector3.forward;
-            canvas.transform.position = playerPos + forward;
+            canvas.transform.position = playerPos + forward + new Vector3(0, -0.25f, 0);
 
-            if (Networking.GetOwner(gameObject).playerId == localPlayer.playerId)
+            if (Networking.IsOwner(Networking.LocalPlayer, gameObject))
             {
-                //hpString = MAX_HP + " / " + MAX_HP;
-                if (players != null)
+                hpString = "";
+                for (int i = 0; i < dungeoneers.Length; i++)
                 {
-                    hpString = "";
-                    foreach (VRCPlayerApi player in players)
+                    if (dungeoneers[i].playerID != -1)
                     {
-                        hpString = hpString + player.displayName + ": " + player.CombatGetCurrentHitpoints() + "/" + MAX_HP + "\n";
+                        hpString = hpString + i + " " + dungeoneers[i].displayName + ": " + dungeoneers[i].currentHP + "/" + dungeoneers[i].maxHP + "\n";
                     }
-                    hpText.text = hpString;
                 }
+                hpText.text = hpString;
             }
         }
     }
 
     public override void OnPlayerJoined(VRCPlayerApi player)
     {
-        if (Networking.GetOwner(gameObject).playerId == Networking.LocalPlayer.playerId)
+        if (Networking.IsOwner(Networking.LocalPlayer, gameObject))
         {
-            if (players == null)
+            for (int i = 0; i < dungeoneers.Length; i++)
             {
-                players = new VRCPlayerApi[1];
-                players[0] = player;
-            }
-            else
-            {
-                VRCPlayerApi[] tempPlayers = new VRCPlayerApi[players.Length + 1];
-                for (int i = 0; i < players.Length; i++)
+                if (dungeoneers[i].playerID == -1)
                 {
-                    tempPlayers[i] = players[i];
+                    dungeoneers[i].displayName = player.displayName;
+                    dungeoneers[i].playerID = player.playerId;
+                    playerCount++;
+                    break;
                 }
-                tempPlayers[players.Length - 1] = player;
-                players = tempPlayers;
+            }
+        }
+    }
+
+    public override void OnPlayerLeft(VRCPlayerApi player)
+    {
+        if (Networking.IsOwner(Networking.LocalPlayer, gameObject))
+        {
+            for (int i = 0; i < dungeoneers.Length; i++)
+            {
+                if (dungeoneers[i].playerID == player.playerId)
+                {
+                    dungeoneers[i].displayName = null;
+                    dungeoneers[i].playerID = -1;
+                    playerCount--;
+                    break;
+                }
             }
         }
     }
