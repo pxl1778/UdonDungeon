@@ -6,8 +6,13 @@ using VRC.Udon;
 
 public class Dungeoneer : UdonSharpBehaviour
 {
-    public int playerID = -1;
-    public string displayName;
-    public float currentHP = 100;
-    public float maxHP = 100;
+    [UdonSynced] public int playerID = -1;
+    [UdonSynced] public string displayName;
+    [UdonSynced] public float currentHP = 100;
+    [UdonSynced] public float maxHP = 100;
+
+    public void TakeDamage()
+    {
+        currentHP--;
+    }
 }

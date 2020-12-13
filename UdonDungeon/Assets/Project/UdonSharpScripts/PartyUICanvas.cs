@@ -13,6 +13,7 @@ public class PartyUICanvas : UdonSharpBehaviour
     [UdonSynced] string hpString;
 
     public Dungeoneer[] dungeoneers;
+    public GameObject dungeoneerManager;
     public Text debugText;
     public Text hpText;
 
@@ -85,5 +86,18 @@ public class PartyUICanvas : UdonSharpBehaviour
     public override void OnDeserialization()
     {
         hpText.text = hpString;
+    }
+
+    public Dungeoneer getDungeoneerForID(int ID)
+    {
+        for (int i = 0; i < dungeoneers.Length; i++)
+        {
+            if (dungeoneers[i].playerID == ID)
+            {
+                return dungeoneers[i];
+            }
+        }
+
+        return null;
     }
 }
