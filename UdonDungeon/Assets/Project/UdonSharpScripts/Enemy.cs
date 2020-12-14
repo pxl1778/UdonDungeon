@@ -8,7 +8,7 @@ using VRC.Udon;
 public class Enemy : UdonSharpBehaviour
 {
     [SerializeField]
-    private int maxHealth = 10;
+    public int maxHealth = 10;
     [SerializeField]
     private float damage = 1;
     [SerializeField]
@@ -25,8 +25,6 @@ public class Enemy : UdonSharpBehaviour
     public Text targetText;
     [SerializeField]
     public Text debugText;
-    [SerializeField]
-    public Text healthText;
     private bool playersNearby = false;
     private VRCPlayerApi Target;
     private VRCPlayerApi[] Players;
@@ -44,7 +42,6 @@ public class Enemy : UdonSharpBehaviour
         rb = this.GetComponent<Rigidbody>();
         health = maxHealth;
         debugText.text += "\nStart";
-        healthText.text = health + "/" + health;
     }
 
     void Update()
@@ -159,14 +156,14 @@ public class Enemy : UdonSharpBehaviour
             targetText.text = "none";
         }
         //debugText.text += "\nOnDeserialization: health = " + health;
-        healthText.text = health + "/" + maxHealth;
+        //healthText.text = health + "/" + maxHealth;
     }
 
     public void TakeDamage()
     {
         health = health - 1;
         debugText.text += "\nTakeDamage: health = " + health;
-        healthText.text = health + "/" + maxHealth;
+        //healthText.text = health + "/" + maxHealth;
         if (health <= 0)
         {
             this.gameObject.SetActive(false);
@@ -175,5 +172,10 @@ public class Enemy : UdonSharpBehaviour
 
     //public override void OnPlayerJoined(VRCPlayerApi player) {
 
+    //}
+
+    //public override void OnPlayerLeft(VRCPlayerApi player)
+    //{
+           
     //}
 }
