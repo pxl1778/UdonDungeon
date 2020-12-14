@@ -65,14 +65,14 @@ public class TestSword : UdonSharpBehaviour
 
     public void OnTriggerExit(Collider other)
     {
-        //debugText.text += "\nontriggerenter: " + other.gameObject.name;
+        debugText.text += "\nontriggerenter: " + other.gameObject.name;
         Enemy enemy = other.gameObject.GetComponent<Enemy>();
         if (other.isTrigger == false && enemy != null && enemy == targetEnemy)
         {
             Vector3 exitPosition = this.gameObject.transform.position;
             Vector3 exitDirection = (exitPosition - enterPosition).normalized;
-            //debugText.text += "\nontriggerenter: correct enemy exit angle: " + Vector3.Angle(exitDirection, swipeDirection);
-            if (Vector3.Angle(exitDirection, swipeDirection) <= maxAngleDifference && timeSinceEntered <= maxSwipeDuration && attackCooldown <= 0)
+            debugText.text += "\nontriggerenter: correct enemy exit angle: " + Vector3.Angle(exitDirection, swipeDirection);
+            if (Vector3.Angle(exitDirection, swipeDirection) <= maxAngleDifference && timeSinceEntered <= maxSwipeDuration && cooldownTime <= 0)
             {
                 debugText.text += "\nHit Enemy: " + other.gameObject.name;
                 if (Networking.IsOwner(Networking.LocalPlayer, enemy.gameObject))

@@ -36,5 +36,13 @@ public class EnemyCanvas : UdonSharpBehaviour
             healthText.text = enemy.health + "/" + enemy.maxHealth;
             healthForegroundPanel.rectTransform.sizeDelta = new Vector2(healthBackgroundPanel.rectTransform.sizeDelta.x * ((float)enemy.health / (float)enemy.maxHealth), healthForegroundPanel.rectTransform.sizeDelta.y);
         }
+        if(enemy.targetDungeoneer != null)
+        {
+            targetText.text = enemy.targetDungeoneer.displayName;
+        }
+        else
+        {
+            targetText.text = "none";
+        }
     }
 }
