@@ -8,7 +8,7 @@ using VRC.Udon;
 public class Enemy : UdonSharpBehaviour
 {
     [SerializeField]
-    private int maxHealth = 10;
+    public int maxHealth = 10;
     [SerializeField]
     private float damage = 1;
     [SerializeField]
@@ -25,10 +25,8 @@ public class Enemy : UdonSharpBehaviour
     public Text targetText;
     [SerializeField]
     public Text debugText;
-    [SerializeField]
-    public Text healthText;
     private bool playersNearby = false;
-    private Dungeoneer targetDungeoneer;
+    public Dungeoneer targetDungeoneer;
     public DungeoneerManager dungeoneerManager;
     private MeshRenderer meshRenderer;
     private Rigidbody rb;
@@ -43,7 +41,6 @@ public class Enemy : UdonSharpBehaviour
         rb = this.GetComponent<Rigidbody>();
         health = maxHealth;
         debugText.text += "\nStart";
-        healthText.text = health + "/" + health;
     }
 
     void Update()
@@ -68,10 +65,7 @@ public class Enemy : UdonSharpBehaviour
                         targetDungeoneer = dungeoneerManager.getDungeoneerForID(localPlayer.playerId);
                         targetID = localPlayer.playerId;
                         meshRenderer.material.color = new Color(1.0f, 0.0f, 0.0f);
-                        targetText.text = localPlayer.displayName;
                         //debugText.text += "\nGrabbed Dungeoneer: " + targetDungeoneer.displayName;
-                        //SendCustomEvent("_onDeserialization");
-                        //this.SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, "UpdateRanking");
                     }
                 }
                 else
@@ -88,7 +82,6 @@ public class Enemy : UdonSharpBehaviour
                 if (attackCooldown <= 0)
                 {
                     attackCooldown = maxAttackCooldown;
-                    //Target.CombatSetCurrentHitpoints(Target.CombatGetCurrentHitpoints() - damage);
                     targetDungeoneer.SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, "TakeDamage");
                 }
                 float distance = Vector3.Distance(Networking.LocalPlayer.GetPosition(), gameObject.transform.position);
@@ -97,14 +90,9 @@ public class Enemy : UdonSharpBehaviour
                 rot.x = 0;
                 rot.z = 0;
                 this.gameObject.transform.rotation = rot;
-                //this.gameObject.transform.rotation
                 if (distance > personalSpace)
                 {
                     Vector3 direction = (Networking.LocalPlayer.GetPosition() - gameObject.transform.position).normalized;
-                    //Vector3 goalPosition = gameObject.transform.position + (direction * speed * Time.deltaTime);
-                    //float goalDistance = Vector3.Distance(goalPosition, gameObject.transform.position);
-                    //this.gameObject.transform.position = goalPosition;
-                    //goalPosition -= direction * (personalSpace - goalDistance);
                     rb.velocity = (direction * speed * Time.deltaTime * Mathf.Clamp(distance - personalSpace, 0, 1.0f));
                 }
                 else
@@ -150,24 +138,20 @@ public class Enemy : UdonSharpBehaviour
             //debugText.text += "\nOn Deserialization targetID != -1";
             meshRenderer.material.color = new Color(1.0f, 0.0f, 0.0f);
             targetDungeoneer = dungeoneerManager.getDungeoneerForID(targetID);
-            targetText.text = targetDungeoneer.displayName;
         }
         else
         {
             //debugText.text += "\nOn Deserialization  targetID == -1";
             meshRenderer.material.color = new Color(1.0f, 1.0f, 1.0f);
-            targetText.text = "none";
             targetDungeoneer = null;
         }
         //debugText.text += "\nOnDeserialization: health = " + health;
-        healthText.text = health + "/" + maxHealth;
     }
 
     public void TakeDamage()
     {
         health = health - 1;
         debugText.text += "\nTakeDamage: health = " + health;
-        healthText.text = health + "/" + maxHealth;
         if (health <= 0)
         {
             this.gameObject.SetActive(false);
@@ -176,5 +160,10 @@ public class Enemy : UdonSharpBehaviour
 
     //public override void OnPlayerJoined(VRCPlayerApi player) {
 
+    //}
+
+    //public override void OnPlayerLeft(VRCPlayerApi player)
+    //{
+           
     //}
 }

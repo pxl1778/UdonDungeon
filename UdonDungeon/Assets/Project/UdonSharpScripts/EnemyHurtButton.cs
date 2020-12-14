@@ -21,7 +21,14 @@ public class EnemyHurtButton : UdonSharpBehaviour
         {
             //Networking.SetOwner(Networking.LocalPlayer, enemy.gameObject);
             //enemy.TakeDamage();
-            enemy.SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, "TakeDamage");
+            if(Networking.IsOwner(Networking.LocalPlayer, enemy.gameObject))
+            {
+                enemy.TakeDamage();
+            }
+            else
+            {
+                enemy.SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, "TakeDamage");
+            }
         }
     }
 }
