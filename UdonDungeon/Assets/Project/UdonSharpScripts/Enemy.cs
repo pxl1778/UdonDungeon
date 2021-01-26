@@ -47,9 +47,13 @@ public class Enemy : UdonSharpBehaviour
     {
         if(targetDungeoneer == null)
         {//searching for target
-            if(!playersNearby) { return; }
+            //if(!playersNearby) { return; }
             //debugText.text += "\nPlayersNearby == true";
             VRCPlayerApi localPlayer = Networking.LocalPlayer;
+            if (dungeoneerManager != null && localPlayer != null && dungeoneerManager.getDungeoneerForID(localPlayer.playerId) != null && dungeoneerManager.getDungeoneerForID(localPlayer.playerId).currentHP <= 0)
+            {
+                return;
+            }
             if (Vector3.Distance(localPlayer.GetPosition(), gameObject.transform.position) < minPlayerDistance)
             {
                 debugText.text += "\nClose Enough to Raycast";
@@ -78,6 +82,12 @@ public class Enemy : UdonSharpBehaviour
         {//chasing target
             if(targetDungeoneer.playerID == Networking.LocalPlayer.playerId)
             {
+                if (targetDungeoneer.currentHP <= 0)
+                {
+                    ResetAggro();
+                    return;
+                }
+
                 attackCooldown -= Time.deltaTime;
                 if (attackCooldown <= 0)
                 {
@@ -106,7 +116,7 @@ public class Enemy : UdonSharpBehaviour
     public override void OnPlayerTriggerEnter(VRCPlayerApi player)
     {
         debugText.text += "\nOnPlayerTriggerEnter";
-        playersNearby = true;
+        //playersNearby = true;
     }
 
     public override void OnPlayerTriggerExit(VRCPlayerApi player)
@@ -115,13 +125,13 @@ public class Enemy : UdonSharpBehaviour
         if (targetDungeoneer != null && player.playerId == targetDungeoneer.playerID)
         {
             ResetAggro();
+            //playersNearby = false;
         }
     }
 
     private void ResetAggro()
     {
         debugText.text += "\nResetAggro";
-        playersNearby = false;
         meshRenderer.material.color = new Color(1.0f, 1.0f, 1.0f);
         targetDungeoneer = null;
         Networking.SetOwner(Networking.LocalPlayer, gameObject);

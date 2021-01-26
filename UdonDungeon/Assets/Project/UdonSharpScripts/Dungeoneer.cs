@@ -8,8 +8,8 @@ public class Dungeoneer : UdonSharpBehaviour
 {
     [UdonSynced] public int playerID = -1;
     [UdonSynced] public string displayName;
-    [UdonSynced] public float currentHP = 100;
-    [UdonSynced] public float maxHP = 100;
+    [UdonSynced] public float currentHP = 5;
+    [UdonSynced] public float maxHP = 5;
 
     public void TakeDamage()
     {
