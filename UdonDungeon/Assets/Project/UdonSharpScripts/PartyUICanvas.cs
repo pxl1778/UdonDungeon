@@ -39,7 +39,7 @@ public class PartyUICanvas : UdonSharpBehaviour
                 {
                     if (dungeoneers[i].playerID != -1)
                     {
-                        hpString = hpString + i + " " + dungeoneers[i].displayName + ": " + dungeoneers[i].currentHP + "/" + dungeoneers[i].maxHP + "\n";
+                        hpString = hpString + dungeoneers[i].playerID + ": " + dungeoneers[i].displayName + ": " + dungeoneers[i].currentHP + "/" + dungeoneers[i].maxHP + "\n";
                     }
                 }
                 hpText.text = hpString;
