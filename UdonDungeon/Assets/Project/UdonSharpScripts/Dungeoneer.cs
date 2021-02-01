@@ -12,25 +12,35 @@ public class Dungeoneer : UdonSharpBehaviour
     [UdonSynced] public float maxHP = 5;
     [UdonSynced] public float deathTimer = 0;
     [UdonSynced] public bool isDead = false;
+    [UdonSynced] public bool needsRespawn = false;
 
     void Update()
     {
-        VRCPlayerApi player = Networking.LocalPlayer;
-        if (player == null)
+        if (isDead && Networking.IsOwner(gameObject))
         {
+            deathTimer -= Time.deltaTime;
+        }
+
+        VRCPlayerApi player = Networking.LocalPlayer;
+        if (player == null || player.playerId != playerID)
+        {
+            return;
+        }
+
+        if (needsRespawn)
+        {
+            Transform target = GameObject.Find("VRCWorld").gameObject.transform;
+            player.TeleportTo(target.position, target.rotation);
+            this.SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, "EndRespawn");
             return;
         }
 
         if (isDead)
         {
             player.Immobilize(true);
-
-            deathTimer -= Time.deltaTime;
             if (deathTimer <= 0)
             {
-                deathTimer = 0;
-                isDead = false;
-                currentHP = maxHP;
+                this.SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, "BeginRespawn");
             }
         } else
         {
@@ -51,5 +61,18 @@ public class Dungeoneer : UdonSharpBehaviour
     {
         isDead = true;
         deathTimer = 10;
+    }
+
+    public void BeginRespawn()
+    {
+        deathTimer = 0;
+        isDead = false;
+        currentHP = maxHP;
+        needsRespawn = true;
+    }
+
+    public void EndRespawn()
+    {
+        needsRespawn = false;
     }
 }
